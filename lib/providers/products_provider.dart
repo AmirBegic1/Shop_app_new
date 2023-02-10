@@ -92,6 +92,9 @@ class Products with ChangeNotifier {
       _items.add(newProdcut);
 
       notifyListeners();
+    }).catchError((error) {
+      print(error);
+      throw error;
     });
   }
 
