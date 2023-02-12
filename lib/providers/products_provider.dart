@@ -122,9 +122,18 @@ class Products with ChangeNotifier {
     }
   }
 
-  void updateProduct(String id, Product newProduct) {
+  Future<void> updateProduct(String id, Product newProduct) async {
     final prodIndex = _items.indexWhere((element) => element.id == id);
     if (prodIndex >= 0) {
+      final url =
+          'https://shopapp-86281-default-rtdb.europe-west1.firebasedatabase.app/products/$id.json';
+      await http.patch(Uri.parse(url),
+          body: json.encode({
+            'title': newProduct.title,
+            'description': newProduct.description,
+            'imageUrl': newProduct.imageUrl,
+            'price': newProduct.price
+          }));
       _items[prodIndex] = newProduct;
       notifyListeners();
     } else {
@@ -133,6 +142,9 @@ class Products with ChangeNotifier {
   }
 
   void deleteProduct(String id) {
+    final url =
+        'https://shopapp-86281-default-rtdb.europe-west1.firebasedatabase.app/products/$id.json';
+    http.delete(Uri.parse(url));
     _items.removeWhere((element) => element.id == id);
     notifyListeners();
   }
