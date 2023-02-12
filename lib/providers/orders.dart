@@ -24,6 +24,38 @@ class Orders with ChangeNotifier {
     return [..._orders];
   }
 
+  Future<void> fetchAndSetOrders() async {
+    const url =
+        'https://shopapp-86281-default-rtdb.europe-west1.firebasedatabase.app/orders.json';
+    final response = await http.get(Uri.parse(url));
+
+    final List<OrderItem> loadedOrders = [];
+
+    final extractedData = json.decode(response.body) as Map<String, dynamic>;
+    if (extractedData.isEmpty) {
+      return;
+    }
+    extractedData.forEach((orderId, orderData) {
+      loadedOrders.add(OrderItem(
+        id: orderId,
+        amount: orderData['amaount'],
+        dateTime: DateTime.parse(orderData['dateTime']),
+        products: (orderData['products'] as List<dynamic>)
+            .map(
+              (item) => CartItem(
+                id: item['id'],
+                title: item['title'],
+                quantity: item['quantity'],
+                price: item['price'],
+              ),
+            )
+            .toList(),
+      ));
+    });
+    _orders = loadedOrders;
+    notifyListeners();
+  }
+
   Future<void> addOrder(List<CartItem> cartProducts, double total) async {
     const url =
         'https://shopapp-86281-default-rtdb.europe-west1.firebasedatabase.app/orders.json';
